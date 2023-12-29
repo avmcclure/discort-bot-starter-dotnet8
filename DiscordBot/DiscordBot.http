@@ -1,0 +1,6 @@
+@DiscordBot_HostAddress = http://localhost:5246
+
+GET {{DiscordBot_HostAddress}}/health/
+Accept: application/json
+
+###

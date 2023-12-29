@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  postgres:
+    image: "postgres:16.1-alpine3.19"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=discord
+    ports:
+      - "5432:5432"
+    container_name: DiscordBot-Local-Database
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "postgres"]
+      timeout: 5s
+      interval: 5s
+  
+  flyway:
+    image: "flyway/flyway:9.22-alpine"
+    command: -url=jdbc:postgresql://postgres:5432/discord -schemas=discord -user=postgres -password=postgres -connectRetries=10 migrate
+    platform: linux/amd64
+    volumes:
+      - ./sql:/flyway/sql
+    depends_on:
+      postgres:
+        condition: service_healthy
