@@ -1,6 +1,13 @@
+using System;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Shared;
 
 namespace DiscordBot;
 
@@ -19,12 +26,15 @@ public class Program
     {
         _configuration = new ConfigurationBuilder()
             .AddEnvironmentVariables(prefix: "DC_")
-            .AddJsonFile("appsettings.json", optional: true)
-            .Build();
+            .AddJsonFile("appsettings.json", optional: true).Build();
+
+        var appSettings = _configuration.Get<AppSettings>();
+        if (appSettings is null) throw new NoNullAllowedException();
 
         _services = new ServiceCollection()
             .AddSingleton(_configuration)
             .AddSingleton(_socketConfig)
+            .AddSingleton(appSettings)
             .AddSingleton<DiscordSocketClient>()
             .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
             .AddSingleton<InteractionHandler>()
